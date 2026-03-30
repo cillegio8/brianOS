@@ -49,10 +49,10 @@ export default function HomePage() {
       if (people) {
         setRecentPeople(
           people.map(p => ({
-            ...(p as Record<string, unknown>),
-            mentions: [],
+            ...p,
+            mentions: [] as (import('@/lib/database.types').Mention & { raw_input: import('@/lib/database.types').RawInput })[],
             mention_count: (p.mentions as any)?.[0]?.count || 0
-          }))
+          })) as PersonWithMentions[]
         )
       }
 
