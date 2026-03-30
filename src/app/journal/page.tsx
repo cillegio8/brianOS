@@ -62,8 +62,16 @@ export default function JournalPage() {
             .lt('created_at', weekEnd),
         ])
 
-        const uniquePeople = new Set(mentionsRes.data?.map(m => m.person_id).filter(Boolean))
-        const uniqueProjects = new Set(mentionsRes.data?.map(m => m.project_id).filter(Boolean))
+        const uniquePeople = new Set(
+          (mentionsRes.data as Array<{person_id: string | null, project_id: string | null}> || [])
+            .map(m => m.person_id)
+            .filter(Boolean)
+        )
+        const uniqueProjects = new Set(
+          (mentionsRes.data as Array<{person_id: string | null, project_id: string | null}> || [])
+            .map(m => m.project_id)
+            .filter(Boolean)
+        )
 
         // Get top people and projects
         const { data: topPeopleData } = await supabase
