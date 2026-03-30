@@ -73,7 +73,7 @@ export const identifyNetworkClusters = (
 
   for (const node of graphData.nodes) {
     if (!visited.has(node.id)) {
-      const clusterNodes = [...dfs(node.id)];
+      const clusterNodes = Array.from(dfs(node.id));
       const personCount = graphData.nodes.filter(n => n.type === 'person' && clusterNodes.includes(n.id)).length;
       const projectCount = graphData.nodes.filter(n => n.type === 'project' && clusterNodes.includes(n.id)).length;
       const weekCount = graphData.nodes.filter(n => n.type === 'week' && clusterNodes.includes(n.id)).length;
@@ -149,4 +149,46 @@ export const analyzeGaps = (
     ),
     unconnectedPeople
   };
+};
+
+const resolveId = (n: string | number | SimulationNode): string =>
+  typeof n === 'object' ? n.id : String(n);
+
+export const highlightConnections = (targetId: string, links: Link[]): string[] => {
+  return links.reduce<string[]>((acc, link) => {
+    const src = resolveId(link.source);
+    const tgt = resolveId(link.target);
+    if (src === targetId || tgt === targetId) {
+      acc.push(src, tgt);
+    }
+    return acc;
+  }, []);
+};
+
+export const getShortestPath = (links: Link[], startId: string, endId: string): string[] => {
+  if (startId === endId) return [];
+
+  const visited = new Set<string>();
+  const queue: [string, string[]][] = [[startId, []]];
+
+  while (queue.length > 0) {
+    const [currentId, path] = queue.shift()!;
+    if (visited.has(currentId)) continue;
+    visited.add(currentId);
+
+    if (currentId === endId) return [...path, currentId];
+
+    links
+      .filter(link => resolveId(link.source) === currentId || resolveId(link.target) === currentId)
+      .forEach(link => {
+        const src = resolveId(link.source);
+        const tgt = resolveId(link.target);
+        const nextId = tgt === currentId ? src : tgt;
+        if (!visited.has(nextId)) {
+          queue.push([nextId, [...path, currentId]]);
+        }
+      });
+  }
+
+  return [];
 };

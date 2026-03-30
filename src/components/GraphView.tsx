@@ -57,7 +57,7 @@ const GraphView: React.FC<GraphViewProps> = ({ data, onNodeClick }) => {
 
     // Create force simulation
     const newSimulation = d3.forceSimulation<SimulationNode, Link>(data.nodes)
-      .force('link', d3.forceLink<SimulationNode>().id(d => d.id).distance(150))
+      .force('link', d3.forceLink<SimulationNode, Link>().id(d => d.id).distance(150))
       .force('charge', d3.forceManyBody<SimulationNode>().strength(-400))
       .force('center', d3.forceCenter<SimulationNode>(width / 2, height / 2));
     
@@ -76,10 +76,10 @@ const GraphView: React.FC<GraphViewProps> = ({ data, onNodeClick }) => {
     
     // Draw nodes
     const nodeGroup = d3.select(gRef.current)
-      .selectAll('g.nodes')
+      .selectAll<SVGGElement, SimulationNode>('g.nodes')
       .data(data.nodes)
       .join('g');
-    
+
     // Add drag behavior to nodes
     nodeGroup
       .call(d3.drag<SVGGElement, SimulationNode>()
@@ -104,7 +104,7 @@ const GraphView: React.FC<GraphViewProps> = ({ data, onNodeClick }) => {
       );
     
     // Node visuals
-    nodeGroup.selectAll('circle')
+    nodeGroup.selectAll<SVGCircleElement, SimulationNode>('circle')
       .data(data.nodes, d => d.id)
       .join('circle')
       .attr('r', d => Math.max(8, Math.log(d.frequency + 1) * 5))
@@ -122,7 +122,7 @@ const GraphView: React.FC<GraphViewProps> = ({ data, onNodeClick }) => {
       });
     
     // Add labels
-    nodeGroup.selectAll('text')
+    nodeGroup.selectAll<SVGTextElement, SimulationNode>('text')
       .data(data.nodes, d => d.id)
       .join('text')
       .attr('x', 10)
@@ -138,10 +138,10 @@ const GraphView: React.FC<GraphViewProps> = ({ data, onNodeClick }) => {
     }
     newSimulation.on('tick', () => {
       linkGroup
-        .attr('x1', d => d.source?.x || 0)
-        .attr('y1', d => d.source?.y || 0)
-        .attr('x2', d => d.target?.x || 0)
-        .attr('y2', d => d.target?.y || 0);
+        .attr('x1', d => (d.source as SimulationNode)?.x || 0)
+        .attr('y1', d => (d.source as SimulationNode)?.y || 0)
+        .attr('x2', d => (d.target as SimulationNode)?.x || 0)
+        .attr('y2', d => (d.target as SimulationNode)?.y || 0);
       
       nodeGroup.attr('transform', d => `translate(${d.x},${d.y})`);
     });
@@ -159,12 +159,12 @@ const GraphView: React.FC<GraphViewProps> = ({ data, onNodeClick }) => {
     if (!gRef.current) return;
     
     // Update links with new data
-    const linkGroup = d3.select(gRef.current).selectAll('line');
+    const linkGroup = d3.select(gRef.current).selectAll<SVGLineElement, Link>('line');
     linkGroup
       .attr('stroke-width', d => d.strength);
-    
+
     // Update node positions with animation
-    const nodeGroup = d3.select(gRef.current).selectAll('circle');
+    const nodeGroup = d3.select(gRef.current).selectAll<SVGCircleElement, SimulationNode>('circle');
     nodeGroup.attr('r', d => d.frequency);
     
   }, [data.links, data.nodes]);  
