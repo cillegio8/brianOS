@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Check, Circle, AlertCircle, Clock } from 'lucide-react'
 import { getClient } from '@/lib/supabase'
 import { cn, getInitials, getColorForName, getRelativeTime } from '@/lib/utils'
@@ -128,6 +128,10 @@ interface ActionItemsListProps {
 
 export function ActionItemsList({ items, onUpdate }: ActionItemsListProps) {
   const [localItems, setLocalItems] = useState(items)
+
+  useEffect(() => {
+    setLocalItems(items)
+  }, [items])
 
   const handleToggle = (id: string, completed: boolean) => {
     setLocalItems(prev => 

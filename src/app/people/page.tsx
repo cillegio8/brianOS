@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Search, UserPlus } from 'lucide-react'
 import { Navigation, PersonCard, PersonList } from '@/components'
 import { getClient } from '@/lib/supabase'
@@ -12,6 +13,7 @@ export default function PeoplePage() {
   const [selectedPerson, setSelectedPerson] = useState<PersonWithMentions | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const searchParams = useSearchParams()
 
   useEffect(() => {
     loadPeople()
@@ -30,13 +32,19 @@ export default function PeoplePage() {
         .order('last_mentioned', { ascending: false })
 
       if (data) {
-        setPeople(
-          data.map(p => ({
-            ...(p as any),
-            mentions: [],
-            mention_count: ((p as any).mentions as any)?.[0]?.count || 0
-          })) as PersonWithMentions[]
-        )
+        const mapped = data.map(p => ({
+          ...(p as any),
+          mentions: [],
+          mention_count: ((p as any).mentions as any)?.[0]?.count || 0
+        })) as PersonWithMentions[]
+
+        setPeople(mapped)
+
+        const personId = searchParams.get('person')
+        if (personId) {
+          const match = mapped.find(p => p.id === personId)
+          if (match) loadPersonDetails(match)
+        }
       }
     } catch (err) {
       console.error('Load error:', err)

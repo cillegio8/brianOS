@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { format, startOfWeek } from 'date-fns'
 import { Navigation, QuickCapture, PersonList, ActionItemsList, WeeklyJournal } from '@/components'
 import { getClient } from '@/lib/supabase'
@@ -30,6 +31,7 @@ export default function HomePage() {
   const [weeklySummary, setWeeklySummary] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
+  const router = useRouter()
   const weekOf = getWeekOf()
 
   const loadData = useCallback(async () => {
@@ -169,7 +171,7 @@ export default function HomePage() {
                 Recent people
               </h2>
               {recentPeople.length > 0 ? (
-                <PersonList people={recentPeople} />
+                <PersonList people={recentPeople} onSelect={p => router.push(`/people/?person=${p.id}`)} />
               ) : (
                 <p className="text-[var(--color-text-tertiary)] text-center py-8">
                   People will appear here when you mention them
