@@ -131,7 +131,7 @@ export default function HomePage() {
         .eq('week_of', weekStart)
         .single()
 
-      setWeeklySummary(journal?.summary || null)
+      setWeeklySummary((journal as any)?.summary || null)
 
     } catch (err) {
       console.error('Load error:', err)

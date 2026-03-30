@@ -20,7 +20,7 @@ function ActionItemRow({ item, onToggle }: ActionItemRowProps) {
     
     try {
       const supabase = getClient()
-      await supabase
+      await (supabase as any)
         .from('action_items')
         .update({ completed: !item.completed })
         .eq('id', item.id)

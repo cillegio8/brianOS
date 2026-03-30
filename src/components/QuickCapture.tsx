@@ -28,7 +28,7 @@ export function QuickCapture({ onCapture }: QuickCaptureProps) {
       const supabase = getClient()
       
       // Insert raw input
-      const { data: input, error: insertError } = await supabase
+      const { data: input, error: insertError } = await (supabase as any)
         .from('raw_inputs')
         .insert({
           content: content.trim(),
