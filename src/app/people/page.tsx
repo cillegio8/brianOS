@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Search, UserPlus } from 'lucide-react'
 import { Navigation, PersonCard, PersonList } from '@/components'
@@ -8,7 +8,7 @@ import { getClient } from '@/lib/supabase'
 import { cn } from '@/lib/utils'
 import type { PersonWithMentions, Mention, RawInput } from '@/lib/database.types'
 
-export default function PeoplePage() {
+function PeoplePageContent() {
   const [people, setPeople] = useState<PersonWithMentions[]>([])
   const [selectedPerson, setSelectedPerson] = useState<PersonWithMentions | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -159,5 +159,13 @@ export default function PeoplePage() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function PeoplePage() {
+  return (
+    <Suspense>
+      <PeoplePageContent />
+    </Suspense>
   )
 }
