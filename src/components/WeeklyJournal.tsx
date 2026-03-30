@@ -33,8 +33,9 @@ export function WeeklyJournal({ weekOf, summary, stats, onRegenerate }: WeeklyJo
 
     try {
       const supabase = getClient()
+      const journalModel = localStorage.getItem('brainos_journal_model') || undefined
       await supabase.functions.invoke('generate-journal', {
-        body: { week_of: format(currentWeek, 'yyyy-MM-dd') }
+        body: { week_of: format(currentWeek, 'yyyy-MM-dd'), model: journalModel }
       })
       onRegenerate?.()
     } catch (err) {

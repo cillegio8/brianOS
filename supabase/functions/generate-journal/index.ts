@@ -38,7 +38,7 @@ serve(async (req) => {
   }
 
   try {
-    const { week_of } = await req.json();
+    const { week_of, model: requestedModel } = await req.json();
 
     if (!week_of) {
       throw new Error("week_of is required (YYYY-MM-DD format)");
@@ -132,7 +132,7 @@ Write a 2-3 paragraph summary that:
 
 Keep it natural and useful - this is for the person to quickly remember what happened. No headers or bullet points, just flowing prose.`
       }
-    ], "anthropic/claude-3.5-sonnet");
+    ], requestedModel || "anthropic/claude-3.5-sonnet");
 
     // Upsert the weekly journal
     const { error: upsertError } = await supabase

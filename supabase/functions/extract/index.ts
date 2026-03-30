@@ -61,7 +61,7 @@ serve(async (req) => {
   }
 
   try {
-    const { input_id } = await req.json();
+    const { input_id, model: requestedModel } = await req.json();
 
     if (!input_id) {
       throw new Error("input_id is required");
@@ -93,7 +93,7 @@ serve(async (req) => {
     const peopleContext = existingPeople?.map(p => p.name).join(", ") || "none yet";
     const projectsContext = existingProjects?.map(p => p.name).join(", ") || "none yet";
 
-    // Call OpenRouter for extraction (using Claude Haiku - cheap & fast)
+    // Call OpenRouter for extraction
     const extractionText = await callOpenRouter([
       {
         role: "user",
@@ -121,7 +121,7 @@ Return ONLY valid JSON, no markdown or explanation. Example:
   "mentions": [{"person_name": "John Smith", "project_name": "ALMAZ", "snippet": "John is leading the ALMAZ backend work"}]
 }`
       }
-    ], "anthropic/claude-3-haiku");
+    ], requestedModel || "anthropic/claude-3-haiku");
 
     // Parse the extraction result
     let extraction: ExtractionResult;

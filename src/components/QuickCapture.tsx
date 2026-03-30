@@ -41,8 +41,9 @@ export function QuickCapture({ onCapture }: QuickCaptureProps) {
       if (insertError) throw insertError
 
       // Trigger AI extraction via Edge Function
+      const extractModel = localStorage.getItem('brainos_extract_model') || undefined
       const { error: fnError } = await supabase.functions.invoke('extract', {
-        body: { input_id: input.id }
+        body: { input_id: input.id, model: extractModel }
       })
 
       if (fnError) {

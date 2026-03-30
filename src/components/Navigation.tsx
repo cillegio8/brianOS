@@ -57,8 +57,10 @@ export function Navigation() {
           href="/settings/"
           className={cn(
             "flex items-center gap-3 px-4 py-3 rounded-xl",
-            "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]",
-            "hover:bg-[var(--color-bg-secondary)] transition-colors"
+            "transition-colors",
+            pathname.startsWith('/settings')
+              ? "text-brand-600 bg-brand-50 dark:bg-brand-900/20"
+              : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)]"
           )}
         >
           <Settings className="w-5 h-5" />
