@@ -1,53 +1,11 @@
+'use client';
+
 import React, { useEffect, useState } from 'react';
-import GraphView from '@/components/GraphView';
+import GraphView, { SimulationNode, Link } from '@/components/GraphView';
+import { identifyNetworkClusters, analyzeGaps, NetworkCluster, GapAnalysis } from '@/lib/graphUtils';
 
-// Extend D3's SimulationNodeDatum to include our custom properties from shared types
-import { SimulationNode } from '@/components/GraphView';
-interface ProjectNode {
-  id: string;
-  type: 'project';
-  status: 'active' | 'done' | 'stalled';
-  frequency: number;
-}
-
-interface WeekNode {
-  id: string;
-  type: 'week';
-  frequency: number;
-}
-
-type GraphNode = PersonNode | ProjectNode | WeekNode;
-interface GraphLink {
-  source: string;
-  target: string;
-  strength: number;
-}
-
-// Network clustering types
-type NetworkCluster = {
-  name: string;
-  nodes: string[];
-  type: 'team' | 'project-group' | 'time-period';
-};
-
-// Gap analysis types
-type GapAnalysis = {
-  missingConnections: {
-    source: string;
-    target: string;
-    importance: number;
-    suggestion: string;
-  }[];
-  inactiveProjects: {
-    id: string;
-    lastActivity: string;
-    risk: 'high' | 'medium' | 'low';
-  }[];
-  unconnectedPeople: {
-    id: string;
-    lastConnection: string | null;
-  }[];
-};
+type GraphNode = SimulationNode;
+type GraphLink = Link;
 
 export default function GraphPage() {
   const [graphData, setGraphData] = useState<{ nodes: GraphNode[], links: GraphLink[] }>({ nodes: [], links: [] });
@@ -77,10 +35,6 @@ export default function GraphPage() {
     const gapAnalysis = analyzeGaps(graphData, clusters);
     setGapAnalysis(gapAnalysis);
   }, [graphData, clusters]);
-  const [gapAnalysis, setGapAnalysis] = useState<GapAnalysis | null>(null);
-  const [queryResults, setQueryResults] = useState<{ nodes: GraphNode[], links: GraphLink[] } | null>(null);
-  const [selectedCluster, setSelectedCluster] = useState<string | null>(null);
-  const [highlightedConnections, setHighlightedConnections] = useState<string[]>([]);
 
   // Fetch graph data from API
   useEffect(() => {

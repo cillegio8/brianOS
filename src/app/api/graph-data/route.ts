@@ -1,5 +1,9 @@
 import { NextRequest } from 'next/server';
-export type { SimulationNode, Link, GraphData, NetworkCluster };
+import { SimulationNode, Link, NetworkCluster } from '@/lib/graphUtils';
+export type { SimulationNode, Link, NetworkCluster };
+
+const nodeId = (n: string | number | SimulationNode): string =>
+  typeof n === 'object' ? n.id : String(n);
 
 // Function to identify network clusters using adjacency and depth-first search
 export const identifyNetworkClusters = (
@@ -19,12 +23,10 @@ export const identifyNetworkClusters = (
   
   // Populate adjacency list with bidirectional connections
   graphData.links.forEach(link => {
-    if (adjacency.has(link.source)) {
-      adjacency.get(link.source)!.add(link.target);
-    }
-    if (adjacency.has(link.target)) {
-      adjacency.get(link.target)!.add(link.source);
-    }
+    const src = nodeId(link.source);
+    const tgt = nodeId(link.target);
+    if (adjacency.has(src)) adjacency.get(src)!.add(tgt);
+    if (adjacency.has(tgt)) adjacency.get(tgt)!.add(src);
   });
   
   // Depth-first search to find connected components
@@ -150,10 +152,12 @@ export const analyzeGaps = (graphData: { nodes: SimulationNode[], links: Link[] 
 };
 
 // Function to highlight connections for a specific node
-export const highlightConnections = (nodeId: string, links: Link[]): string[] => {
+export const highlightConnections = (targetId: string, links: Link[]): string[] => {
   return links.reduce<string[]>((acc, link) => {
-    if (link.target === nodeId || link.source === nodeId) {
-      acc.push(link.source, link.target);
+    const src = nodeId(link.source);
+    const tgt = nodeId(link.target);
+    if (tgt === targetId || src === targetId) {
+      acc.push(src, tgt);
     }
     return acc;
   }, []);
@@ -178,9 +182,11 @@ export const getShortestPath = (links: Link[], startId: string, endId: string) =
     
     // Add connections to queue
     links
-      .filter(link => link.source === currentId || link.target === currentId)
+      .filter(link => nodeId(link.source) === currentId || nodeId(link.target) === currentId)
       .forEach(link => {
-        const nextId = link.target === currentId ? link.source : link.target;
+        const src = nodeId(link.source);
+        const tgt = nodeId(link.target);
+        const nextId = tgt === currentId ? src : tgt;
         if (!visited.has(nextId)) {
           queue.push([nextId, { path: [...path, currentId] }]);
         }
