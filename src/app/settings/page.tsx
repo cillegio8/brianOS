@@ -19,6 +19,8 @@ const MODELS: Model[] = [
   { id: 'anthropic/claude-3-haiku',             name: 'Claude 3 Haiku',      provider: 'Anthropic', cost: '$',    description: 'Fast and cheap, reliable for simple tasks' },
   { id: 'deepseek/deepseek-chat',               name: 'DeepSeek V3',         provider: 'DeepSeek',  cost: '$',    description: 'Strong reasoning at very low cost' },
   { id: 'meta-llama/llama-3.1-70b-instruct',   name: 'Llama 3.1 70B',       provider: 'Meta',      cost: '$',    description: 'Open-source, fast, good at instruction following' },
+  { id: 'qwen/qwen3-235b-a22b',                name: 'Qwen3 235B',          provider: 'Alibaba',   cost: '$',    description: 'Powerful MoE model, strong multilingual & reasoning' },
+  { id: 'z-ai/glm-4-32b',                      name: 'GLM-4 32B',           provider: 'Zhipu AI',  cost: '$',    description: 'Fast Chinese frontier model, solid instruction following' },
   { id: 'anthropic/claude-3.5-haiku',           name: 'Claude 3.5 Haiku',    provider: 'Anthropic', cost: '$$',   description: 'Smarter Haiku — better writing, still affordable' },
   { id: 'google/gemini-pro-1.5',                name: 'Gemini 1.5 Pro',      provider: 'Google',    cost: '$$',   description: 'Long context, strong reasoning and writing' },
   { id: 'openai/o1-mini',                       name: 'o1 Mini',             provider: 'OpenAI',    cost: '$$',   description: 'Reasoning model, good for complex extraction' },
