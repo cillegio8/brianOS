@@ -86,7 +86,7 @@ export default function JournalPage() {
 
         weeksData.push({
           weekOf,
-          summary: journalRes.data?.summary || null,
+          summary: (journalRes.data as { summary: string | null } | null)?.summary || null,
           stats: {
             inputCount: inputsRes.count || 0,
             peopleCount: uniquePeople.size,
