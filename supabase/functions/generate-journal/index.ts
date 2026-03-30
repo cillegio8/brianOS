@@ -1,11 +1,36 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.4";
-import Anthropic from "https://esm.sh/@anthropic-ai/sdk@0.24.3";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// OpenRouter API call helper
+async function callOpenRouter(messages: Array<{role: string, content: string}>, model: string = "anthropic/claude-3.5-sonnet") {
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${Deno.env.get("OPENROUTER_API_KEY")}`,
+      "Content-Type": "application/json",
+      "HTTP-Referer": Deno.env.get("APP_URL") || "https://brainos.app",
+      "X-Title": "BrainOS",
+    },
+    body: JSON.stringify({
+      model: model,
+      messages: messages,
+      max_tokens: 1024,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`OpenRouter error: ${error}`);
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content;
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -23,10 +48,6 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
-
-    const anthropic = new Anthropic({
-      apiKey: Deno.env.get("ANTHROPIC_API_KEY")!,
-    });
 
     // Calculate week end
     const weekStart = new Date(week_of);
@@ -88,14 +109,11 @@ serve(async (req) => {
       return `${status} [${a.priority}] ${a.description}${person}`;
     }).join("\n") || "None";
 
-    // Generate summary with Claude Sonnet (better for synthesis)
-    const message = await anthropic.messages.create({
-      model: "claude-3-5-sonnet-20241022",
-      max_tokens: 1024,
-      messages: [
-        {
-          role: "user",
-          content: `Generate a concise weekly journal summary based on these notes. Write in second person ("You..."). Be specific about what happened, who was involved, and what progress was made. Highlight any patterns or themes.
+    // Generate summary with Claude Sonnet via OpenRouter
+    const summary = await callOpenRouter([
+      {
+        role: "user",
+        content: `Generate a concise weekly journal summary based on these notes. Write in second person ("You..."). Be specific about what happened, who was involved, and what progress was made. Highlight any patterns or themes.
 
 RAW NOTES FROM THE WEEK:
 ${inputsSummary}
@@ -113,11 +131,8 @@ Write a 2-3 paragraph summary that:
 4. Ends with a brief "looking ahead" if relevant
 
 Keep it natural and useful - this is for the person to quickly remember what happened. No headers or bullet points, just flowing prose.`
-        }
-      ],
-    });
-
-    const summary = message.content[0].type === "text" ? message.content[0].text : "";
+      }
+    ], "anthropic/claude-3.5-sonnet");
 
     // Upsert the weekly journal
     const { error: upsertError } = await supabase

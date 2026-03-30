@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.4";
-import Anthropic from "https://esm.sh/@anthropic-ai/sdk@0.24.3";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -29,6 +28,32 @@ interface ExtractionResult {
   }>;
 }
 
+// OpenRouter API call helper
+async function callOpenRouter(messages: Array<{role: string, content: string}>, model: string = "anthropic/claude-3-haiku") {
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${Deno.env.get("OPENROUTER_API_KEY")}`,
+      "Content-Type": "application/json",
+      "HTTP-Referer": Deno.env.get("APP_URL") || "https://brainos.app",
+      "X-Title": "BrainOS",
+    },
+    body: JSON.stringify({
+      model: model,
+      messages: messages,
+      max_tokens: 1024,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`OpenRouter error: ${error}`);
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content;
+}
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -42,15 +67,11 @@ serve(async (req) => {
       throw new Error("input_id is required");
     }
 
-    // Initialize clients
+    // Initialize Supabase client
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
-
-    const anthropic = new Anthropic({
-      apiKey: Deno.env.get("ANTHROPIC_API_KEY")!,
-    });
 
     // Get the raw input
     const { data: input, error: inputError } = await supabase
@@ -72,14 +93,11 @@ serve(async (req) => {
     const peopleContext = existingPeople?.map(p => p.name).join(", ") || "none yet";
     const projectsContext = existingProjects?.map(p => p.name).join(", ") || "none yet";
 
-    // Call Claude for extraction
-    const message = await anthropic.messages.create({
-      model: "claude-3-haiku-20240307",
-      max_tokens: 1024,
-      messages: [
-        {
-          role: "user",
-          content: `Extract structured information from this note. Be thorough but accurate.
+    // Call OpenRouter for extraction (using Claude Haiku - cheap & fast)
+    const extractionText = await callOpenRouter([
+      {
+        role: "user",
+        content: `Extract structured information from this note. Be thorough but accurate.
 
 EXISTING PEOPLE IN SYSTEM: ${peopleContext}
 EXISTING PROJECTS IN SYSTEM: ${projectsContext}
@@ -102,12 +120,10 @@ Return ONLY valid JSON, no markdown or explanation. Example:
   "action_items": [{"description": "Follow up with John", "person_name": "John Smith", "priority": "medium"}],
   "mentions": [{"person_name": "John Smith", "project_name": "ALMAZ", "snippet": "John is leading the ALMAZ backend work"}]
 }`
-        }
-      ],
-    });
+      }
+    ], "anthropic/claude-3-haiku");
 
     // Parse the extraction result
-    const extractionText = message.content[0].type === "text" ? message.content[0].text : "";
     let extraction: ExtractionResult;
     
     try {
