@@ -51,7 +51,7 @@ export default function HomePage() {
           people.map(p => ({
             ...(p as any),
             mentions: [],
-            mention_count: (p.mentions as any)?.[0]?.count || 0
+            mention_count: ((p as any).mentions as any)?.[0]?.count || 0
           })) as PersonWithMentions[]
         )
       }
