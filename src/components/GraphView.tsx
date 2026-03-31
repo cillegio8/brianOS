@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useImperativeHandle, forwardRef } from 'react';
 import * as d3 from 'd3';
 
 // Extend D3's SimulationNodeDatum to include our custom properties
@@ -26,10 +26,35 @@ interface GraphViewProps {
   onNodeClick: (node: SimulationNode) => void;
 }
 
-const GraphView: React.FC<GraphViewProps> = ({ data, onNodeClick }) => {
+export interface GraphViewHandle {
+  zoomIn: () => void;
+  zoomOut: () => void;
+  center: () => void;
+}
+
+const GraphView = forwardRef<GraphViewHandle, GraphViewProps>(({ data, onNodeClick }, ref) => {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const gRef = useRef<SVGGElement | null>(null);
+  const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown> | null>(null);
   const [simulation, setSimulation] = useState<d3.Simulation<SimulationNode, Link> | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    zoomIn() {
+      if (svgRef.current && zoomRef.current) {
+        d3.select(svgRef.current).transition().duration(300).call(zoomRef.current.scaleBy, 1.5);
+      }
+    },
+    zoomOut() {
+      if (svgRef.current && zoomRef.current) {
+        d3.select(svgRef.current).transition().duration(300).call(zoomRef.current.scaleBy, 1 / 1.5);
+      }
+    },
+    center() {
+      if (svgRef.current && zoomRef.current) {
+        d3.select(svgRef.current).transition().duration(300).call(zoomRef.current.transform, d3.zoomIdentity);
+      }
+    },
+  }));
 
   // Initialize simulation and graphics
   useEffect(() => {
@@ -39,17 +64,18 @@ const GraphView: React.FC<GraphViewProps> = ({ data, onNodeClick }) => {
     const height = window.innerHeight * 0.8;
     
     // Create SVG element
+    const zoom = d3.zoom<SVGSVGElement, unknown>()
+      .scaleExtent([0.1, 4])
+      .on('zoom', (event) => {
+        if (gRef.current) {
+          d3.select(gRef.current).attr('transform', event.transform);
+        }
+      });
+    zoomRef.current = zoom;
     const svg = d3.select(svgRef.current)
       .attr('width', width)
       .attr('height', height)
-      .call(d3.zoom<SVGSVGElement, unknown>()
-        .scaleExtent([0.1, 4])
-        .on('zoom', (event) => {
-          if (gRef.current) {
-            d3.select(gRef.current).attr('transform', event.transform);
-          }
-        })
-      );
+      .call(zoom);
     
     // Clear previous graphics
     svg.selectAll('g').remove();
@@ -170,6 +196,7 @@ const GraphView: React.FC<GraphViewProps> = ({ data, onNodeClick }) => {
   }, [data.links, data.nodes]);  
 
   return <svg ref={svgRef} style={{ width: '100%', height: '80vh' }} />;
-};
+});
 
+GraphView.displayName = 'GraphView';
 export default GraphView;

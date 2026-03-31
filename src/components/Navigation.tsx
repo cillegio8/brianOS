@@ -1,6 +1,6 @@
 'use client'
 
-import { Brain, Home, Users, CheckSquare, Calendar, Settings } from 'lucide-react'
+import { Brain, Home, Users, CheckSquare, Calendar, Network, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -10,6 +10,7 @@ const navItems = [
   { href: '/people/', icon: Users, label: 'People' },
   { href: '/actions/', icon: CheckSquare, label: 'Actions' },
   { href: '/journal/', icon: Calendar, label: 'Journal' },
+  { href: '/graph/', icon: Network, label: 'Graph' },
 ]
 
 export function Navigation() {
