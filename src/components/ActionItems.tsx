@@ -9,9 +9,10 @@ import type { ActionItemWithPerson } from '@/lib/database.types'
 interface ActionItemRowProps {
   item: ActionItemWithPerson
   onToggle?: (id: string, completed: boolean) => void
+  onDelete?: (id: string) => void
 }
 
-function ActionItemRow({ item, onToggle }: ActionItemRowProps) {
+function ActionItemRow({ item, onToggle, onDelete }: ActionItemRowProps) {
   const [isUpdating, setIsUpdating] = useState(false)
 
   const handleToggle = async () => {
@@ -80,6 +81,21 @@ function ActionItemRow({ item, onToggle }: ActionItemRowProps) {
               {item.priority}
             </span>
           </div>
+          {/* Delete button */}
+          <button
+            type="button"
+            onClick={() => onDelete?.(item.id)}
+            className={cn(
+              "flex items-center gap-1 px-2 py-1 rounded-full text-xs",
+              "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+              "hover:bg-red-200 dark:hover:bg-red-800 transition-colors"
+            )}
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Delete
+          </button>
 
           {/* Due date */}
           {item.due_date && (
@@ -124,9 +140,10 @@ function ActionItemRow({ item, onToggle }: ActionItemRowProps) {
 interface ActionItemsListProps {
   items: ActionItemWithPerson[]
   onUpdate?: () => void
+  onDelete?: (id: string) => void
 }
 
-export function ActionItemsList({ items, onUpdate }: ActionItemsListProps) {
+export function ActionItemsList({ items, onUpdate, onDelete }: ActionItemsListProps) {
   const [localItems, setLocalItems] = useState(items)
 
   useEffect(() => {
@@ -142,6 +159,24 @@ export function ActionItemsList({ items, onUpdate }: ActionItemsListProps) {
     onUpdate?.()
   }
 
+  const handleDelete = async (id: string) => {
+    if (!onDelete) return
+
+    try {
+      const supabase = getClient()
+      await (supabase as any)
+        .from('action_items')
+        .delete()
+        .eq('id', id)
+
+      setLocalItems(prev => prev.filter(item => item.id !== id))
+      onUpdate?.()
+      onDelete(id)
+    } catch (err) {
+      console.error('Delete error:', err)
+    }
+  }
+
   const pendingItems = localItems.filter(i => !i.completed)
   const completedItems = localItems.filter(i => i.completed)
 
@@ -155,7 +190,7 @@ export function ActionItemsList({ items, onUpdate }: ActionItemsListProps) {
           </h3>
           <div className="space-y-2">
             {pendingItems.map(item => (
-              <ActionItemRow key={item.id} item={item} onToggle={handleToggle} />
+              <ActionItemRow key={item.id} item={item} onToggle={handleToggle} onDelete={handleDelete} />
             ))}
           </div>
         </div>
@@ -169,7 +204,7 @@ export function ActionItemsList({ items, onUpdate }: ActionItemsListProps) {
           </h3>
           <div className="space-y-2">
             {completedItems.map(item => (
-              <ActionItemRow key={item.id} item={item} onToggle={handleToggle} />
+              <ActionItemRow key={item.id} item={item} onToggle={handleToggle} onDelete={handleDelete} />
             ))}
           </div>
         </div>

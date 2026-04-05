@@ -34,6 +34,20 @@ export default function HomePage() {
   const router = useRouter()
   const weekOf = getWeekOf()
 
+  const handleDelete = async (id: string) => {
+    try {
+      const supabase = getClient()
+      await (supabase as any)
+        .from('action_items')
+        .delete()
+        .eq('id', id)
+    } catch (err) {
+      console.error('Delete error:', err)
+    } finally {
+      loadData()
+    }
+  }
+
   const loadData = useCallback(async () => {
     const supabase = getClient()
 
@@ -193,9 +207,10 @@ export default function HomePage() {
               <h2 className="text-sm font-medium text-[var(--color-text-secondary)] uppercase tracking-wide mb-4">
                 Action items
               </h2>
-              <ActionItemsList items={actionItems} onUpdate={loadData} />
+              <ActionItemsList items={actionItems} onUpdate={loadData} onDelete={handleDelete} />
             </div>
           </div>
+
         </div>
       </main>
     </div>
