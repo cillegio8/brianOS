@@ -160,20 +160,27 @@ export function ActionItemsList({ items, onUpdate, onDelete }: ActionItemsListPr
   }
 
   const handleDelete = async (id: string) => {
-    if (!onDelete) return
-
     try {
       const supabase = getClient()
-      await (supabase as any)
+      console.log('Attempting to delete action item with id:', id)
+      
+      const { error } = await (supabase as any)
         .from('action_items')
         .delete()
         .eq('id', id)
 
+      if (error) {
+        console.error('Supabase delete error:', error)
+        throw error
+      }
+
+      console.log('Successfully deleted action item:', id)
       setLocalItems(prev => prev.filter(item => item.id !== id))
       onUpdate?.()
-      onDelete(id)
+      onDelete?.(id)
     } catch (err) {
       console.error('Delete error:', err)
+      alert(`Failed to delete action item: ${err instanceof Error ? err.message : 'Unknown error'}`)
     }
   }
 
