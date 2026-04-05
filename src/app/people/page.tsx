@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Search, UserPlus } from 'lucide-react'
-import { Navigation, PersonCard, PersonList } from '@/components'
+import { Navigation, PersonCard, PersonList, ProtectedRoute } from '@/components'
 import { getClient } from '@/lib/supabase'
 import { cn } from '@/lib/utils'
 import type { PersonWithMentions, Mention, RawInput } from '@/lib/database.types'
@@ -191,8 +191,10 @@ function PeoplePageContent() {
 
 export default function PeoplePage() {
   return (
-    <Suspense>
-      <PeoplePageContent />
-    </Suspense>
+    <ProtectedRoute>
+      <Suspense>
+        <PeoplePageContent />
+      </Suspense>
+    </ProtectedRoute>
   )
 }

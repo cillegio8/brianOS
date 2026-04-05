@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from 'react'
 import { Filter } from 'lucide-react'
-import { Navigation, ActionItemsList } from '@/components'
+import { Navigation, ActionItemsList, ProtectedRoute } from '@/components'
 import { getClient } from '@/lib/supabase'
 import { cn } from '@/lib/utils'
 import type { ActionItemWithPerson } from '@/lib/database.types'
 
 type FilterType = 'all' | 'pending' | 'completed' | 'overdue'
 
-export default function ActionsPage() {
+function ActionsPageContent() {
   const [actionItems, setActionItems] = useState<ActionItemWithPerson[]>([])
   const [filter, setFilter] = useState<FilterType>('pending')
   const [isLoading, setIsLoading] = useState(true)
@@ -113,5 +113,13 @@ export default function ActionsPage() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function ActionsPage() {
+  return (
+    <ProtectedRoute>
+      <ActionsPageContent />
+    </ProtectedRoute>
   )
 }

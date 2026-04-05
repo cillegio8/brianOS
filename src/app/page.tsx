@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { format, startOfWeek } from 'date-fns'
-import { Navigation, QuickCapture, ActionItemsList, WeeklyJournal, PersonCard } from '@/components'
+import { Navigation, QuickCapture, ActionItemsList, WeeklyJournal, PersonCard, ProtectedRoute } from '@/components'
 import { getClient } from '@/lib/supabase'
 import { getWeekOf } from '@/lib/utils'
 import type { PersonWithMentions, ActionItemWithPerson, Person, Project } from '@/lib/database.types'
@@ -17,7 +17,7 @@ interface WeeklyStats {
   topProjects: Project[]
 }
 
-export default function HomePage() {
+function HomePageContent() {
   const [recentPeople, setRecentPeople] = useState<PersonWithMentions[]>([])
   const [actionItems, setActionItems] = useState<ActionItemWithPerson[]>([])
   const [weeklyStats, setWeeklyStats] = useState<WeeklyStats>({
@@ -214,5 +214,13 @@ export default function HomePage() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function HomePage() {
+  return (
+    <ProtectedRoute>
+      <HomePageContent />
+    </ProtectedRoute>
   )
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { format, startOfWeek, subWeeks } from 'date-fns'
-import { Navigation, WeeklyJournal } from '@/components'
+import { Navigation, WeeklyJournal, ProtectedRoute } from '@/components'
 import { getClient } from '@/lib/supabase'
 import { cn } from '@/lib/utils'
 import type { Person, Project } from '@/lib/database.types'
@@ -20,7 +20,7 @@ interface WeekData {
   }
 }
 
-export default function JournalPage() {
+function JournalPageContent() {
   const [weeks, setWeeks] = useState<WeekData[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -152,5 +152,13 @@ export default function JournalPage() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function JournalPage() {
+  return (
+    <ProtectedRoute>
+      <JournalPageContent />
+    </ProtectedRoute>
   )
 }

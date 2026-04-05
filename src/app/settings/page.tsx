@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Settings, Zap, BookOpen, Check } from 'lucide-react'
-import { Navigation } from '@/components'
+import { Navigation, ProtectedRoute } from '@/components'
 import { cn } from '@/lib/utils'
 
 interface Model {
@@ -104,7 +104,7 @@ function ModelPicker({
   )
 }
 
-export default function SettingsPage() {
+function SettingsPageContent() {
   const [extractModel, setExtractModel] = useState(DEFAULT_EXTRACT_MODEL)
   const [journalModel, setJournalModel] = useState(DEFAULT_JOURNAL_MODEL)
   const [saved, setSaved] = useState(false)
@@ -177,5 +177,13 @@ export default function SettingsPage() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function SettingsPage() {
+  return (
+    <ProtectedRoute>
+      <SettingsPageContent />
+    </ProtectedRoute>
   )
 }

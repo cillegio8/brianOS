@@ -9,6 +9,32 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      users: {
+        Row: {
+          id: string
+          email: string
+          name: string
+          role: 'admin' | 'user'
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          name: string
+          role?: 'admin' | 'user'
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          name?: string
+          role?: 'admin' | 'user'
+          created_at?: string
+          updated_at?: string
+        }
+      }
       raw_inputs: {
         Row: {
           id: string
@@ -17,6 +43,7 @@ export interface Database {
           audio_url: string | null
           processed: boolean
           created_at: string
+          user_id: string
         }
         Insert: {
           id?: string
@@ -25,6 +52,7 @@ export interface Database {
           audio_url?: string | null
           processed?: boolean
           created_at?: string
+          user_id?: string
         }
         Update: {
           id?: string
@@ -33,6 +61,7 @@ export interface Database {
           audio_url?: string | null
           processed?: boolean
           created_at?: string
+          user_id?: string
         }
       }
       people: {
@@ -44,6 +73,7 @@ export interface Database {
           embedding: number[] | null
           last_mentioned: string | null
           created_at: string
+          user_id: string
         }
         Insert: {
           id?: string
@@ -53,6 +83,7 @@ export interface Database {
           embedding?: number[] | null
           last_mentioned?: string | null
           created_at?: string
+          user_id?: string
         }
         Update: {
           id?: string
@@ -62,6 +93,7 @@ export interface Database {
           embedding?: number[] | null
           last_mentioned?: string | null
           created_at?: string
+          user_id?: string
         }
       }
       projects: {
@@ -72,6 +104,7 @@ export interface Database {
           context: string | null
           embedding: number[] | null
           created_at: string
+          user_id: string
         }
         Insert: {
           id?: string
@@ -80,6 +113,7 @@ export interface Database {
           context?: string | null
           embedding?: number[] | null
           created_at?: string
+          user_id?: string
         }
         Update: {
           id?: string
@@ -88,6 +122,7 @@ export interface Database {
           context?: string | null
           embedding?: number[] | null
           created_at?: string
+          user_id?: string
         }
       }
       mentions: {
@@ -129,6 +164,7 @@ export interface Database {
           completed: boolean
           priority: 'high' | 'medium' | 'low'
           created_at: string
+          user_id: string
         }
         Insert: {
           id?: string
@@ -139,6 +175,7 @@ export interface Database {
           completed?: boolean
           priority?: 'high' | 'medium' | 'low'
           created_at?: string
+          user_id?: string
         }
         Update: {
           id?: string
@@ -149,6 +186,7 @@ export interface Database {
           completed?: boolean
           priority?: 'high' | 'medium' | 'low'
           created_at?: string
+          user_id?: string
         }
       }
       weekly_journals: {
@@ -157,18 +195,21 @@ export interface Database {
           week_of: string
           summary: string
           generated_at: string
+          user_id: string
         }
         Insert: {
           id?: string
           week_of: string
           summary: string
           generated_at?: string
+          user_id?: string
         }
         Update: {
           id?: string
           week_of?: string
           summary?: string
           generated_at?: string
+          user_id?: string
         }
       }
     }
@@ -176,6 +217,7 @@ export interface Database {
 }
 
 // Helper types
+export type User = Database['public']['Tables']['users']['Row']
 export type RawInput = Database['public']['Tables']['raw_inputs']['Row']
 export type Person = Database['public']['Tables']['people']['Row']
 export type Project = Database['public']['Tables']['projects']['Row']
