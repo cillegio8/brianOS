@@ -106,6 +106,10 @@ export default function JournalPage() {
     }
   }, [])
 
+  const handleDeleteJournal = async (weekOf: string) => {
+    setWeeks(prev => prev.filter(week => week.weekOf !== weekOf))
+  }
+
   useEffect(() => {
     loadWeeks()
   }, [loadWeeks])
@@ -140,6 +144,7 @@ export default function JournalPage() {
                   summary={week.summary}
                   stats={week.stats}
                   onRegenerate={loadWeeks}
+                  onDelete={handleDeleteJournal}
                 />
               ))}
             </div>

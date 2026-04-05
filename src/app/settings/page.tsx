@@ -24,8 +24,6 @@ const MODELS: Model[] = [
   { id: 'anthropic/claude-3.5-haiku',           name: 'Claude 3.5 Haiku',    provider: 'Anthropic', price: '$0.8 / $4',        description: 'Smarter Haiku — better writing, still affordable' },
   { id: 'google/gemini-pro-1.5',                name: 'Gemini 1.5 Pro',      provider: 'Google',    price: '$1.25 / $5',       description: 'Long context, strong reasoning and writing' },
   { id: 'anthropic/claude-3.5-sonnet',          name: 'Claude 3.5 Sonnet',   provider: 'Anthropic', price: '$3 / $15',         description: 'Excellent writing quality and instruction following' },
-  { id: 'openai/gpt-4o',                        name: 'GPT-4o',              provider: 'OpenAI',    price: '$2.5 / $10',       description: 'Highly capable, great for nuanced journal writing' },
-  { id: 'anthropic/claude-3-opus',              name: 'Claude 3 Opus',       provider: 'Anthropic', price: '$15 / $75',        description: 'Most capable Claude, best for complex synthesis' },
   { id: 'qwen/qwen3.5-27b-claude-4.6-opus-reasoning-distilled', name: 'Qwen3.5-27B-Claude-4.6-Opus-Reasoning-Distilled', provider: 'Alibaba/Anthropic', price: '$0.75 / $2',        description: 'Distilled reasoning model combining Qwen and Claude capabilities' },
   { id: 'google/gemma-4-26b-a4b-it',            name: 'Gemma 4 26B A4B IT',  provider: 'Google',    price: '$0.6 / $1.2',      description: 'Instruction-tuned model with strong reasoning and multilingual support' },
 ]

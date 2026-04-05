@@ -21,9 +21,10 @@ interface WeeklyJournalProps {
   summary: string | null
   stats: WeeklyStats
   onRegenerate?: () => void
+  onDelete?: (weekOf: string) => void
 }
 
-export function WeeklyJournal({ weekOf, summary, stats, onRegenerate }: WeeklyJournalProps) {
+export function WeeklyJournal({ weekOf, summary, stats, onRegenerate, onDelete }: WeeklyJournalProps) {
   const [isRegenerating, setIsRegenerating] = useState(false)
   const [currentWeek, setCurrentWeek] = useState(new Date(weekOf))
 
@@ -42,6 +43,28 @@ export function WeeklyJournal({ weekOf, summary, stats, onRegenerate }: WeeklyJo
       console.error('Regenerate error:', err)
     } finally {
       setIsRegenerating(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!onDelete) return
+
+    try {
+      const supabase = getClient()
+      const { error } = await (supabase as any)
+        .from('weekly_journals')
+        .delete()
+        .eq('week_of', weekOf)
+
+      if (error) {
+        console.error('Delete error:', error)
+        throw error
+      }
+
+      onDelete(weekOf)
+    } catch (err) {
+      console.error('Delete error:', err)
+      alert(`Failed to delete journal: ${err instanceof Error ? err.message : 'Unknown error'}`)
     }
   }
 
@@ -94,23 +117,39 @@ export function WeeklyJournal({ weekOf, summary, stats, onRegenerate }: WeeklyJo
             </button>
           </div>
 
-          <button
-            type="button"
-            onClick={handleRegenerate}
-            disabled={isRegenerating}
-            className={cn(
-              "flex items-center gap-2 px-3 py-2 rounded-lg text-sm",
-              "bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-tertiary)]",
-              "text-[var(--color-text-secondary)] transition-colors"
-            )}
-          >
-            {isRegenerating ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <RefreshCw className="w-4 h-4" />
-            )}
-            Regenerate
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleDelete}
+              className={cn(
+                "flex items-center gap-2 px-3 py-2 rounded-lg text-sm",
+                "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+                "hover:bg-red-200 dark:hover:bg-red-800 transition-colors"
+              )}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Delete
+            </button>
+            <button
+              type="button"
+              onClick={handleRegenerate}
+              disabled={isRegenerating}
+              className={cn(
+                "flex items-center gap-2 px-3 py-2 rounded-lg text-sm",
+                "bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-tertiary)]",
+                "text-[var(--color-text-secondary)] transition-colors"
+              )}
+            >
+              {isRegenerating ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4" />
+              )}
+              Regenerate
+            </button>
+          </div>
         </div>
       </div>
 
