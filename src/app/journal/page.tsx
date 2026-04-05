@@ -35,9 +35,8 @@ export default function JournalPage() {
         return format(date, 'yyyy-MM-dd')
       })
 
-      const weeksData: WeekData[] = []
-
-      for (const weekOf of weekDates) {
+      // Load all weeks in parallel
+      const weeksPromises = weekDates.map(async (weekOf) => {
         const weekEnd = format(new Date(new Date(weekOf).getTime() + 7 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd')
 
         const [journalRes, inputsRes, mentionsRes, actionsRes] = await Promise.all([
@@ -84,7 +83,7 @@ export default function JournalPage() {
           .select('*')
           .in('id', Array.from(uniqueProjects).slice(0, 5))
 
-        weeksData.push({
+        return {
           weekOf,
           summary: (journalRes.data as { summary: string | null } | null)?.summary || null,
           stats: {
@@ -95,9 +94,10 @@ export default function JournalPage() {
             topPeople: topPeopleData || [],
             topProjects: topProjectsData || [],
           }
-        })
-      }
+        }
+      })
 
+      const weeksData = await Promise.all(weeksPromises)
       setWeeks(weeksData)
     } catch (err) {
       console.error('Load error:', err)
