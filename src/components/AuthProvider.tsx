@@ -1,91 +1,97 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useRef, useState, ReactNode } from 'react'
 import { getClient } from '@/lib/supabase'
 import type { User } from '@/lib/database.types'
+
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 interface AuthContextType {
   user: User | null
   isLoading: boolean
+  isAdmin: boolean
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string, name: string) => Promise<void>
   signOut: () => Promise<void>
-  isAdmin: boolean
 }
+
+// ─── Context ─────────────────────────────────────────────────────────────────
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function useAuth() {
-  const context = useContext(AuthContext)
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider')
-  }
-  return context
+  const ctx = useContext(AuthContext)
+  if (!ctx) throw new Error('useAuth must be used within an AuthProvider')
+  return ctx
 }
 
+// ─── Helper ──────────────────────────────────────────────────────────────────
+
+async function fetchUserRecord(userId: string): Promise<User | null> {
+  try {
+    const supabase = getClient()
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', userId)
+      .single()
+    if (error) {
+      console.warn('[AuthProvider] Could not fetch user record:', error.message)
+      return null
+    }
+    return data as User
+  } catch (err) {
+    console.error('[AuthProvider] fetchUserRecord threw:', err)
+    return null
+  }
+}
+
+// ─── Provider ────────────────────────────────────────────────────────────────
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const supabase = getClient()
+  const [user, setUser]         = useState<User | null>(null)
+  const [isLoading, setLoading] = useState(true)
+  const mounted = useRef(true)
 
   useEffect(() => {
-    const getUser = async () => {
-      try {
-        const { data: { user: authUser } } = await supabase.auth.getUser()
-        if (authUser) {
-          const { data: userData } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', authUser.id)
-            .single()
-          setUser(userData)
-        }
-      } catch (error) {
-        console.error('Error getting user:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
+    mounted.current = true
+    const supabase   = getClient()
 
-    getUser()
-
+    // Single source of truth: onAuthStateChange fires immediately with the
+    // current session, so we never need a separate getUser() call.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
-          setIsLoading(true)
-        }
+      async (_event, session) => {
+        if (!mounted.current) return
+
         if (session?.user) {
-          const { data: userData } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', session.user.id)
-            .single()
-          setUser(userData)
+          const record = await fetchUserRecord(session.user.id)
+          if (mounted.current) setUser(record)
         } else {
-          setUser(null)
+          if (mounted.current) setUser(null)
         }
-        setIsLoading(false)
+
+        if (mounted.current) setLoading(false)
       }
     )
 
-    return () => subscription.unsubscribe()
-  }, [supabase])
+    return () => {
+      mounted.current = false
+      subscription.unsubscribe()
+    }
+  }, [])
+
+  // ── Auth actions ────────────────────────────────────────────────────────
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    const supabase = getClient()
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) throw error
   }
 
   const signUp = async (email: string, password: string, name: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    })
+    const supabase = getClient()
+    const { data, error } = await supabase.auth.signUp({ email, password })
     if (error) throw error
-
     if (data.user) {
       await supabase.from('users').insert({
         id: data.user.id,
@@ -97,14 +103,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const signOut = async () => {
+    const supabase = getClient()
     const { error } = await supabase.auth.signOut()
     if (error) throw error
   }
 
-  const isAdmin = user?.role === 'admin'
+  // ── Value ───────────────────────────────────────────────────────────────
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, signIn, signUp, signOut, isAdmin }}>
+    <AuthContext.Provider value={{
+      user,
+      isLoading,
+      isAdmin: user?.role === 'admin',
+      signIn,
+      signUp,
+      signOut,
+    }}>
       {children}
     </AuthContext.Provider>
   )
