@@ -66,13 +66,13 @@ function AdminPageContent() {
     if (!editingUser) return
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('users')
         .update({
           email: editingUser.email,
           name: editingUser.name,
           role: editingUser.role,
-        } as any)
+        })
         .eq('id', editingUser.id)
 
       if (error) throw error
@@ -91,7 +91,7 @@ function AdminPageContent() {
     }
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('users')
         .delete()
         .eq('id', userId)
