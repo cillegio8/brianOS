@@ -9,25 +9,25 @@ interface Model {
   id: string
   name: string
   provider: string
-  cost: '$' | '$$' | '$$$' | '$$$$'
+  price: string
   description: string
 }
 
 const MODELS: Model[] = [
-  { id: 'google/gemini-flash-1.5',              name: 'Gemini 1.5 Flash',    provider: 'Google',    cost: '$',    description: 'Ultra-fast, great for structured extraction' },
-  { id: 'openai/gpt-4o-mini',                   name: 'GPT-4o Mini',         provider: 'OpenAI',    cost: '$',    description: 'Capable and affordable, solid JSON output' },
-  { id: 'anthropic/claude-3-haiku',             name: 'Claude 3 Haiku',      provider: 'Anthropic', cost: '$',    description: 'Fast and cheap, reliable for simple tasks' },
-  { id: 'deepseek/deepseek-chat',               name: 'DeepSeek V3',         provider: 'DeepSeek',  cost: '$',    description: 'Strong reasoning at very low cost' },
-  { id: 'meta-llama/llama-3.1-70b-instruct',   name: 'Llama 3.1 70B',       provider: 'Meta',      cost: '$',    description: 'Open-source, fast, good at instruction following' },
-  { id: 'qwen/qwen3-235b-a22b',                name: 'Qwen3 235B',          provider: 'Alibaba',   cost: '$',    description: 'Powerful MoE model, strong multilingual & reasoning' },
-  { id: 'z-ai/glm-4-32b',                      name: 'GLM-4 32B',           provider: 'Zhipu AI',  cost: '$',    description: 'Fast Chinese frontier model, solid instruction following' },
-  { id: 'anthropic/claude-3.5-haiku',           name: 'Claude 3.5 Haiku',    provider: 'Anthropic', cost: '$$',   description: 'Smarter Haiku — better writing, still affordable' },
-  { id: 'google/gemini-pro-1.5',                name: 'Gemini 1.5 Pro',      provider: 'Google',    cost: '$$',   description: 'Long context, strong reasoning and writing' },
-  { id: 'openai/o1-mini',                       name: 'o1 Mini',             provider: 'OpenAI',    cost: '$$',   description: 'Reasoning model, good for complex extraction' },
-  { id: 'anthropic/claude-3.5-sonnet',          name: 'Claude 3.5 Sonnet',   provider: 'Anthropic', cost: '$$$',  description: 'Excellent writing quality and instruction following' },
-  { id: 'openai/gpt-4o',                        name: 'GPT-4o',              provider: 'OpenAI',    cost: '$$$',  description: 'Highly capable, great for nuanced journal writing' },
-  { id: 'anthropic/claude-3-opus',              name: 'Claude 3 Opus',       provider: 'Anthropic', cost: '$$$$', description: 'Most capable Claude, best for complex synthesis' },
-  { id: 'openai/o1',                            name: 'o1',                  provider: 'OpenAI',    cost: '$$$$', description: 'Advanced reasoning, highest quality output' },
+  { id: 'google/gemini-flash-1.5',              name: 'Gemini 1.5 Flash',    provider: 'Google',    price: '$0.075 / $0.3',    description: 'Ultra-fast, great for structured extraction' },
+  { id: 'openai/gpt-4o-mini',                   name: 'GPT-4o Mini',         provider: 'OpenAI',    price: '$0.15 / $0.6',     description: 'Capable and affordable, solid JSON output' },
+  { id: 'anthropic/claude-3-haiku',             name: 'Claude 3 Haiku',      provider: 'Anthropic', price: '$0.25 / $1.25',    description: 'Fast and cheap, reliable for simple tasks' },
+  { id: 'deepseek/deepseek-chat',               name: 'DeepSeek V3',         provider: 'DeepSeek',  price: '$0.14 / $0.28',    description: 'Strong reasoning at very low cost' },
+  { id: 'meta-llama/llama-3.1-70b-instruct',   name: 'Llama 3.1 70B',       provider: 'Meta',      price: '$0.52 / $0.75',    description: 'Open-source, fast, good at instruction following' },
+  { id: 'qwen/qwen3-235b-a22b',                name: 'Qwen3 235B',          provider: 'Alibaba',   price: '$0.59 / $0.79',    description: 'Powerful MoE model, strong multilingual & reasoning' },
+  { id: 'z-ai/glm-4-32b',                      name: 'GLM-4 32B',           provider: 'Zhipu AI',  price: '$0.5 / $0.5',      description: 'Fast Chinese frontier model, solid instruction following' },
+  { id: 'anthropic/claude-3.5-haiku',           name: 'Claude 3.5 Haiku',    provider: 'Anthropic', price: '$0.8 / $4',        description: 'Smarter Haiku — better writing, still affordable' },
+  { id: 'google/gemini-pro-1.5',                name: 'Gemini 1.5 Pro',      provider: 'Google',    price: '$1.25 / $5',       description: 'Long context, strong reasoning and writing' },
+  { id: 'anthropic/claude-3.5-sonnet',          name: 'Claude 3.5 Sonnet',   provider: 'Anthropic', price: '$3 / $15',         description: 'Excellent writing quality and instruction following' },
+  { id: 'openai/gpt-4o',                        name: 'GPT-4o',              provider: 'OpenAI',    price: '$2.5 / $10',       description: 'Highly capable, great for nuanced journal writing' },
+  { id: 'anthropic/claude-3-opus',              name: 'Claude 3 Opus',       provider: 'Anthropic', price: '$15 / $75',        description: 'Most capable Claude, best for complex synthesis' },
+  { id: 'qwen/qwen3.5-27b-claude-4.6-opus-reasoning-distilled', name: 'Qwen3.5-27B-Claude-4.6-Opus-Reasoning-Distilled', provider: 'Alibaba/Anthropic', price: '$0.75 / $2',        description: 'Distilled reasoning model combining Qwen and Claude capabilities' },
+  { id: 'google/gemma-4-26b-a4b-it',            name: 'Gemma 4 26B A4B IT',  provider: 'Google',    price: '$0.6 / $1.2',      description: 'Instruction-tuned model with strong reasoning and multilingual support' },
 ]
 
 const COST_COLORS: Record<string, string> = {
@@ -95,12 +95,9 @@ function ModelPicker({
                 <p className="text-xs text-[var(--color-text-secondary)] truncate">{model.description}</p>
               </div>
 
-              {/* Cost badge */}
-              <span className={cn(
-                'text-xs font-semibold px-2 py-0.5 rounded-md shrink-0 font-mono',
-                COST_COLORS[model.cost]
-              )}>
-                {model.cost}
+              {/* Price */}
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-md shrink-0 font-mono bg-[var(--color-bg-secondary)] text-[var(--color-text-secondary)]">
+                {model.price}
               </span>
             </button>
           )
@@ -164,7 +161,7 @@ export default function SettingsPage() {
 
             <div className="flex items-center justify-between pt-4 border-t border-[var(--color-border-secondary)]">
               <p className="text-xs text-[var(--color-text-tertiary)]">
-                Cost indicators are approximate per million tokens
+                Prices are per million tokens (input / output) via OpenRouter
               </p>
               <button
                 type="button"

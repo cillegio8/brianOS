@@ -9,9 +9,10 @@ interface PersonCardProps {
   person: PersonWithMentions
   compact?: boolean
   onClick?: () => void
+  onDelete?: (id: string) => void
 }
 
-export function PersonCard({ person, compact = false, onClick }: PersonCardProps) {
+export function PersonCard({ person, compact = false, onClick, onDelete }: PersonCardProps) {
   const color = getColorForName(person.name)
   const initials = getInitials(person.name)
 
@@ -43,7 +44,26 @@ export function PersonCard({ person, compact = false, onClick }: PersonCardProps
             )}
           </p>
         </div>
-        <ChevronRight className="w-5 h-5 text-[var(--color-text-tertiary)] group-hover:text-[var(--color-text-secondary)] transition-colors" />
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onDelete?.(person.id)
+            }}
+            className={cn(
+              "flex items-center gap-1 px-2 py-1 rounded-full text-xs",
+              "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+              "hover:bg-red-200 dark:hover:bg-red-800 transition-colors"
+            )}
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Delete
+          </button>
+          <ChevronRight className="w-5 h-5 text-[var(--color-text-tertiary)] group-hover:text-[var(--color-text-secondary)] transition-colors" />
+        </div>
       </button>
     )
   }
@@ -60,9 +80,25 @@ export function PersonCard({ person, compact = false, onClick }: PersonCardProps
             {initials}
           </div>
           <div className="flex-1">
-            <h2 className="text-xl font-semibold text-[var(--color-text-primary)]">
-              {person.name}
-            </h2>
+            <div className="flex items-start justify-between">
+              <h2 className="text-xl font-semibold text-[var(--color-text-primary)]">
+                {person.name}
+              </h2>
+              <button
+                type="button"
+                onClick={() => onDelete?.(person.id)}
+                className={cn(
+                  "flex items-center gap-1 px-2 py-1 rounded-full text-xs",
+                  "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+                  "hover:bg-red-200 dark:hover:bg-red-800 transition-colors"
+                )}
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Delete
+              </button>
+            </div>
             {person.aliases.length > 0 && (
               <p className="text-sm text-[var(--color-text-secondary)] mt-1">
                 Also known as: {person.aliases.join(', ')}

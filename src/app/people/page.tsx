@@ -77,6 +77,32 @@ function PeoplePageContent() {
     }
   }
 
+  const handleDeletePerson = async (id: string) => {
+    try {
+      const supabase = getClient()
+      console.log('Attempting to delete person with id:', id)
+      
+      const { error } = await (supabase as any)
+        .from('people')
+        .delete()
+        .eq('id', id)
+
+      if (error) {
+        console.error('Supabase delete error:', error)
+        throw error
+      }
+
+      console.log('Successfully deleted person:', id)
+      setPeople(prev => prev.filter(p => p.id !== id))
+      if (selectedPerson?.id === id) {
+        setSelectedPerson(null)
+      }
+    } catch (err) {
+      console.error('Delete error:', err)
+      alert(`Failed to delete person: ${err instanceof Error ? err.message : 'Unknown error'}`)
+    }
+  }
+
   const filteredPeople = people.filter(p =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.aliases.some(a => a.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -132,6 +158,7 @@ function PeoplePageContent() {
                     person={person}
                     compact
                     onClick={() => loadPersonDetails(person)}
+                    onDelete={handleDeletePerson}
                   />
                 ))
               ) : (
@@ -147,7 +174,7 @@ function PeoplePageContent() {
             <div className="hidden md:block">
               {selectedPerson ? (
                 <div className="sticky top-8">
-                  <PersonCard person={selectedPerson} />
+                  <PersonCard person={selectedPerson} onDelete={handleDeletePerson} />
                 </div>
               ) : (
                 <div className="bg-[var(--color-bg-secondary)] rounded-2xl p-8 text-center text-[var(--color-text-secondary)]">
