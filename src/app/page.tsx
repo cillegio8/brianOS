@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { format, startOfWeek } from 'date-fns'
-import { Navigation, QuickCapture, PersonList, ActionItemsList, WeeklyJournal } from '@/components'
+import { Navigation, QuickCapture, ActionItemsList, WeeklyJournal, PersonCard } from '@/components'
 import { getClient } from '@/lib/supabase'
 import { getWeekOf } from '@/lib/utils'
 import type { PersonWithMentions, ActionItemWithPerson, Person, Project } from '@/lib/database.types'
@@ -171,7 +171,16 @@ export default function HomePage() {
                 Recent people
               </h2>
               {recentPeople.length > 0 ? (
-                <PersonList people={recentPeople} onSelect={p => router.push(`/people/?person=${p.id}`)} />
+                <div className="space-y-2">
+                  {recentPeople.map((person) => (
+                    <PersonCard
+                      key={person.id}
+                      person={person}
+                      compact
+                      onClick={() => router.push(`/people/?person=${person.id}`)}
+                    />
+                  ))}
+                </div>
               ) : (
                 <p className="text-[var(--color-text-tertiary)] text-center py-8">
                   People will appear here when you mention them
