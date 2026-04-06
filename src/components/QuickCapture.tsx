@@ -104,13 +104,19 @@ export function QuickCapture({ onCapture }: QuickCaptureProps) {
   }
 
   return (
-    <div className="bg-[var(--color-bg-primary)] rounded-2xl border border-[var(--color-border-secondary)] p-4 shadow-sm">
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-sm font-medium text-[var(--color-text-secondary)]">
-          Quick capture
-        </span>
-        <span className="text-xs text-[var(--color-text-tertiary)]">
-          ⌘ + Enter to save
+    <div className="group relative bg-[var(--color-bg-primary)] rounded-2xl border border-[var(--color-border-secondary)] p-5 shadow-lg shadow-brand-500/5 hover:shadow-brand-500/10 transition-all duration-300">
+      {/* Decorative gradient border effect */}
+      <div className="absolute -inset-0.5 bg-gradient-to-r from-brand-400 to-brand-600 rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none" />
+      
+      <div className="relative flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-brand-500 animate-pulse" />
+          <span className="text-sm font-semibold text-[var(--color-text-secondary)] uppercase tracking-widest">
+            Quick capture
+          </span>
+        </div>
+        <span className="text-xs font-medium text-[var(--color-text-tertiary)] bg-[var(--color-bg-secondary)] px-2 py-1 rounded-md">
+          ⌘ + Enter
         </span>
       </div>
 
@@ -119,13 +125,13 @@ export function QuickCapture({ onCapture }: QuickCaptureProps) {
         value={content}
         onChange={(e) => setContent(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Dump your thoughts here... meetings, ideas, people, anything."
+        placeholder="Dump your thoughts... meetings, ideas, people, anything."
         className={cn(
-          "w-full min-h-[120px] max-h-[300px] p-3 rounded-xl resize-none",
-          "bg-[var(--color-bg-secondary)] border-0",
-          "text-[var(--color-text-primary)] placeholder:text-[var(--color-text-tertiary)]",
-          "focus:outline-none focus:ring-2 focus:ring-brand-400/50",
-          "text-[15px] leading-relaxed"
+          "w-full min-h-[140px] max-h-[400px] p-4 rounded-xl resize-none translate-z-0",
+          "bg-[var(--color-bg-secondary)]/50 backdrop-blur-sm border-2 border-transparent",
+          "text-[16px] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-tertiary)]",
+          "focus:outline-none focus:border-brand-400/30 focus:bg-[var(--color-bg-secondary)]",
+          "transition-all duration-200 leading-relaxed custom-scrollbar"
         )}
       />
 
@@ -163,10 +169,11 @@ export function QuickCapture({ onCapture }: QuickCaptureProps) {
           onClick={handleSubmit}
           disabled={!content.trim() || isSubmitting}
           className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium",
-            "bg-brand-600 text-white",
-            "hover:bg-brand-700 transition-colors",
-            "disabled:opacity-50 disabled:cursor-not-allowed"
+            "flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold",
+            "bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-md shadow-brand-600/20",
+            "hover:shadow-lg hover:shadow-brand-600/30 hover:-translate-y-0.5",
+            "active:translate-y-0 active:scale-95 transition-all duration-200",
+            "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           )}
         >
           {isSubmitting ? (

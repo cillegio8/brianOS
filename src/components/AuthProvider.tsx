@@ -57,20 +57,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     mounted.current = true
     const supabase   = getClient()
 
-    // Single source of truth: onAuthStateChange fires immediately with the
-    // current session, so we never need a separate getUser() call.
+    async function handleSession(session: any) {
+      if (!mounted.current) return
+
+      if (session?.user) {
+        const record = await fetchUserRecord(session.user.id)
+        if (mounted.current) setUser(record)
+      } else {
+        if (mounted.current) setUser(null)
+      }
+
+      if (mounted.current) setLoading(false)
+    }
+
+    // Initial session check
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      handleSession(session)
+    })
+
+    // Listen for changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        if (!mounted.current) return
-
-        if (session?.user) {
-          const record = await fetchUserRecord(session.user.id)
-          if (mounted.current) setUser(record)
-        } else {
-          if (mounted.current) setUser(null)
-        }
-
-        if (mounted.current) setLoading(false)
+      (_event, session) => {
+        handleSession(session)
       }
     )
 

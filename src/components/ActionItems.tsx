@@ -45,24 +45,34 @@ function ActionItemRow({ item, onToggle, onDelete }: ActionItemRowProps) {
   return (
     <div
       className={cn(
-        "flex items-start gap-3 p-4 rounded-xl",
-        "bg-[var(--color-bg-secondary)]",
-        item.completed && "opacity-60"
+        "group relative flex items-start gap-4 p-4 rounded-2xl transition-all duration-300",
+        "bg-[var(--color-bg-primary)] border border-[var(--color-border-secondary)]",
+        "hover:shadow-md hover:shadow-brand-500/5 hover:-translate-y-0.5",
+        item.completed && "opacity-60 grayscale-[0.5]"
       )}
     >
+      {/* Selection indicator line */}
+      <div className={cn(
+        "absolute left-0 top-1/4 bottom-1/4 w-1 rounded-r-full transition-all duration-300 opacity-0 group-hover:opacity-100",
+        priorityColors[item.priority]
+      )} />
       <button
         type="button"
         onClick={handleToggle}
         disabled={isUpdating}
         className={cn(
-          "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5",
-          "transition-colors",
+          "w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 mt-0.5",
+          "transition-all duration-200 transform active:scale-90",
           item.completed
             ? "bg-brand-600 border-brand-600 text-white"
-            : "border-[var(--color-border-primary)] hover:border-brand-400"
+            : "border-[var(--color-border-primary)] group-hover:border-brand-400 bg-[var(--color-bg-secondary)]"
         )}
       >
-        {item.completed && <Check className="w-3 h-3" />}
+        {item.completed ? (
+          <Check className="w-4 h-4 stroke-[3px]" />
+        ) : (
+          <div className="w-1.5 h-1.5 rounded-full bg-brand-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+        )}
       </button>
 
       <div className="flex-1 min-w-0">
@@ -73,52 +83,47 @@ function ActionItemRow({ item, onToggle, onDelete }: ActionItemRowProps) {
           {item.description}
         </p>
         
-        <div className="flex items-center gap-3 mt-2 flex-wrap">
+        <div className="flex items-center gap-4 mt-3 flex-wrap">
           {/* Priority indicator */}
-          <div className="flex items-center gap-1.5">
-            <div className={cn("w-2 h-2 rounded-full", priorityColors[item.priority])} />
-            <span className="text-xs text-[var(--color-text-secondary)] capitalize">
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[var(--color-bg-secondary)] border border-[var(--color-border-secondary)]">
+            <div className={cn("w-2 h-2 rounded-full shadow-sm", priorityColors[item.priority])} />
+            <span className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">
               {item.priority}
             </span>
           </div>
-          {/* Delete button */}
+          
+          {/* Due date */}
+          {item.due_date && (
+            <div className={cn(
+              "flex items-center gap-1.5 text-[11px] font-medium px-2 py-0.5 rounded-md",
+              isOverdue 
+                ? "bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 border border-red-200/50" 
+                : "bg-[var(--color-bg-secondary)] text-[var(--color-text-secondary)] border border-[var(--color-border-secondary)]"
+            )}>
+              {isOverdue ? <AlertCircle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+              <span>{isOverdue ? 'Overdue' : getRelativeTime(item.due_date)}</span>
+            </div>
+          )}
+
+          {/* Delete button - only show on hover */}
           <button
             type="button"
             onClick={() => onDelete?.(item.id)}
             className={cn(
-              "flex items-center gap-1 px-2 py-1 rounded-full text-xs",
-              "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
-              "hover:bg-red-200 dark:hover:bg-red-800 transition-colors"
+              "flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-all duration-200",
+              "bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 border border-red-200/50 hover:bg-red-100 dark:hover:bg-red-800/40"
             )}
           >
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
-            Delete
+            Remove
           </button>
-
-          {/* Due date */}
-          {item.due_date && (
-            <div className={cn(
-              "flex items-center gap-1 text-xs",
-              isOverdue ? "text-red-500" : "text-[var(--color-text-secondary)]"
-            )}>
-              {isOverdue ? (
-                <AlertCircle className="w-3 h-3" />
-              ) : (
-                <Clock className="w-3 h-3" />
-              )}
-              <span>
-                {isOverdue ? 'Overdue' : getRelativeTime(item.due_date)}
-              </span>
-            </div>
-          )}
-
           {/* Person */}
           {item.person && (
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[var(--color-bg-secondary)] border border-[var(--color-border-secondary)]">
               <div
-                className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-medium"
+                className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold"
                 style={{
                   backgroundColor: getColorForName(item.person.name).bg,
                   color: getColorForName(item.person.name).text
@@ -126,7 +131,7 @@ function ActionItemRow({ item, onToggle, onDelete }: ActionItemRowProps) {
               >
                 {getInitials(item.person.name)}
               </div>
-              <span className="text-xs text-[var(--color-text-secondary)]">
+              <span className="text-[11px] font-medium text-[var(--color-text-secondary)]">
                 {item.person.name}
               </span>
             </div>
